@@ -274,6 +274,7 @@ while [ $# -gt 0 ]; do
 	-pvfs2)		FSTYP=pvfs2 ;;
 	-tmpfs)		FSTYP=tmpfs ;;
 	-ubifs)		FSTYP=ubifs ;;
+	-local)		FSTYP=local ;;
 
 	-g)	group=$2 ; shift ;
 		GROUP_LIST="$GROUP_LIST ${group//,/ }"

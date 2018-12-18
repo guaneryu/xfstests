@@ -334,24 +334,31 @@ _supports_filetype()
 
 _local_validate_mount_opt()
 {
-    case "$*" in
-	ro|ro,*|*,ro) _notrun "ro mount option not supported" ;;
-	*nosuid*) _notrun "nosuid mount option not supported" ;;
-	*noatime*) _notrun "noatime mount option not supported" ;;
-	*relatime*) _notrun "relatime mount option not supported" ;;
-	*diratime*) _notrun "diratime mount option not supported" ;;
-	*strictatime*) _notrun "strictatime mount option not supported" ;;
-    esac
+	case "$*" in
+		ro|ro,*|*,ro) _notrun "ro mount option not supported" ;;
+		*nosuid*) _notrun "nosuid mount option not supported" ;;
+		*noatime*) _notrun "noatime mount option not supported" ;;
+		*relatime*) _notrun "relatime mount option not supported" ;;
+		*diratime*) _notrun "diratime mount option not supported" ;;
+		*strictatime*) _notrun "strictatime mount option not supported" ;;
+	esac
 }
 
 # mount scratch device with given options but don't check mount status
 _try_scratch_mount()
 {
-	if [ "$FSTYP" == "overlay" ]; then
+	case "$FSTYP" in
+	overlay)
 		_overlay_scratch_mount $*
 		return $?
-	fi
-	_mount -t $FSTYP `_scratch_mount_options $*`
+		;;
+	local)
+		_local_validate_mount_opt "$*"
+		;;
+	*)
+		_mount -t $FSTYP `_scratch_mount_options $*`
+		;;
+	esac
 }
 
 # mount scratch device with given options and _fail if mount fails
@@ -370,7 +377,6 @@ _scratch_unmount()
 		$UMOUNT_PROG $SCRATCH_MNT
 		;;
 	local)
-                rm -rf $SCRATCH_MNT/*
                 ;;
 	*)
 		$UMOUNT_PROG $SCRATCH_DEV
@@ -442,7 +448,7 @@ _test_mount()
     fi
     if [ "$FSTYP" == "local" ]; then
         mkdir -p $TEST_DIR
-	return $?
+        return $?
     fi
     _test_options mount
     _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
